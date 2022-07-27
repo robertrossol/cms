@@ -16,13 +16,13 @@ class AppTest < Minitest::Test
     get "/"
     assert_equal 200, last_response.status
     assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
-    assert_includes(last_response.body, "about.txt")
+    assert_includes(last_response.body, "about.md")
     assert_includes(last_response.body, "changes.txt")
     assert_includes(last_response.body, "history.txt")
   end
 
   def test_view_text_doc
-    content = "About.txt
+    content = "History.txt
 1993 - Yukihiro Matsumoto dreams up Ruby.
 1995 - Ruby 0.95 released.
 1996 - Ruby 1.0 released.
@@ -39,7 +39,7 @@ class AppTest < Minitest::Test
 2017 - Ruby 2.5 released.
 2018 - Ruby 2.6 released.
 2019 - Ruby 2.7 released."
-    get "/about.txt"
+    get "/history.txt"
 
     assert_equal 200, last_response.status
     assert_equal "text/plain", last_response["Content-Type"]
@@ -58,7 +58,14 @@ class AppTest < Minitest::Test
 
     get "/"
     refute_includes last_response.body,  "notafile.txt does not exist"
+  end
 
+  def test_viewing_markdown_document
+    get "/about.md"
+
+    assert_equal 200, last_response.status
+    assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
+    assert_includes last_response.body, "<h1>Ruby is...</h1>"
   end
 
 end
