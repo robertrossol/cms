@@ -29,6 +29,13 @@ helpers do
   end
 end
 
+def data_path
+  if ENV["RACK_ENV"] == "test"
+    File.expand_path("../test/data", __FILE__)
+  else
+    File.expand_path("../data", __FILE__)
+  end
+end
 
 root = File.expand_path("..", __FILE__)
 files = Dir.glob(root + "/data/*").map do |path|
@@ -36,7 +43,11 @@ files = Dir.glob(root + "/data/*").map do |path|
 end
 
 get "/" do
-  @files = files
+  pattern = File.join(data_path, "*")
+  @files = Dir.glob(pattern).map do |path|
+    File.basename(path)
+  end
+  # @files = files
   # @text_files = Dir.entries('.').select{|file| file.split('.').last == "txt"}.sort
   # @files = Dir.glob(root + "/data/*").map do |path|
   #   File.basename(path)
@@ -45,12 +56,28 @@ get "/" do
 end
 
 get "/:file_name" do
-  # if files.include?(params[:file_name])
-  pathname = root + "/data/" + params[:file_name]
-  if File.file?(pathname)
-    load_file_content(pathname)
+  file_path = File.join(data_path, params[:file_name])
+  # pathname = root + "/data/" + params[:file_name]
+  if File.exist?(file_path)
+    load_file_content(file_path)
   else
-    session[:error] = "#{params[:file_name]} does not exist"
+    session[:message] = "#{params[:file_name]} does not exist"
     redirect "/"
   end
+end
+
+get "/:file_name/edit" do
+  # pathname = root + "/data/" + params[:file_name]
+  file_path = File.join(data_path, params[:file_name])
+  @content = File.read(file_path)
+
+  erb :edit
+end
+
+post "/:file_name" do
+  file_path = File.join(data_path, params[:file_name])
+  # pathname = root + "/data/" + params[:file_name]
+  File.write(file_path, params[:content])
+  session[:message] = "#{params[:file_name]} has been updated!"
+  redirect "/"
 end
