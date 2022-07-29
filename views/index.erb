@@ -1,13 +1,8 @@
-<%if session[:message] %>
-  <div>
-    <p><%= session.delete(:message) %></p>
-  </div>
-<% end %>
 <ul>
   <%@files.each do |file|%>
     <li>
       <a href="/<%=file%>"><%=file%></a>
-      <a href="/<%=file%>/edit">Edit<%=file%></a>
+      <a href="/<%=file%>/edit">Edit <%=file%></a>
     </li>
   <%end%>
 </ul>
