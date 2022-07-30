@@ -94,6 +94,35 @@ class CMSTest < Minitest::Test
     get "/changes.txt"
     assert_equal 200, last_response.status
     assert_includes last_response.body, "updated text"
+  end
 
+  def test_new
+    get "/new"
+
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, "file_name"
+    assert_includes last_response.body, %q(<button type="submit")
+  end
+
+  def test_create
+    post "/create", file_name: "thing.txt"
+
+    assert_equal 302, last_response.status
+    get last_response["location"]
+    assert_includes last_response.body, "thing.txt was created"
+
+    get "/"
+    assert_includes last_response.body, "thing.txt"
+  end
+
+  def test_create_invalid
+    post "/create", file_name: ""
+
+    assert_equal 422, last_response.status
+    assert_includes last_response.body, "File name must be unique, greater than 0 characters, and have a valid extension"
+
+    post "/create", file_name: "changes.txt"
+    assert_equal 422, last_response.status
+    assert_includes last_response.body, "File name must be unique, greater than 0 characters, and have a valid extension"
   end
 end
