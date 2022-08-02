@@ -27,7 +27,6 @@ helpers do
       erb render_markdown(content)
     end
   end
-  
 end
 
 def data_path
@@ -54,6 +53,30 @@ get "/" do
   #   File.basename(path)
   # end
   erb :index
+end
+
+get "/users/signin" do
+
+  erb :sign_in
+end
+
+post "/users/signin" do  
+  if params[:username] == "admin" && params[:password] == "secret"
+    session[:username] = params[:username]
+    session[:message] = "Welcome!"
+    redirect "/"
+  else
+    session[:message] = "Invalid Credentials"
+    status 422
+    erb :sign_in
+  end
+end
+
+post "/users/signout" do
+  session.delete(:username)
+  session[:message] = "You have been signed out"
+
+  redirect "/"
 end
 
 get "/new" do

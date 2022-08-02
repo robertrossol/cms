@@ -1,0 +1,11 @@
+<form method="post" action="/users/signin">
+<td>
+  <label for="username">Username: </label>
+  <input class="inline" name="username" value="<%= params[:username] || ""%>"type="text">
+</td>
+<td>
+  <label for="username">Password: </label>
+  <input class="inline" name="password" type="text">
+</td>
+  <button type="submit">Sign In</button>
+</form>
