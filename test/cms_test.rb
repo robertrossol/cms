@@ -125,4 +125,18 @@ class CMSTest < Minitest::Test
     assert_equal 422, last_response.status
     assert_includes last_response.body, "File name must be unique, greater than 0 characters, and have a valid extension"
   end
+
+  def test_delete
+    create_document "test.txt"
+
+    post "/test.txt/delete"
+    
+    assert_equal 302, last_response.status
+  
+    get last_response["location"]
+    assert_includes last_response.body, "test.txt has been deleted!"
+
+    get "/"
+    refute_includes last_response.body, "test.txt"
+  end
 end
