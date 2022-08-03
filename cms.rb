@@ -27,6 +27,18 @@ helpers do
       erb render_markdown(content)
     end
   end
+
+  def signed_in?
+    session.key?(:username)
+    # session[:username] == "admin"
+  end
+
+  def confirm_signed_in_user
+    unless signed_in?
+      session[:message] = "You must be signed in to do that."
+      redirect "/"
+    end
+  end
 end
 
 def data_path
@@ -80,11 +92,15 @@ post "/users/signout" do
 end
 
 get "/new" do
+  confirm_signed_in_user
+
   @files = files
   erb :new
 end
 
 post "/create" do
+  confirm_signed_in_user
+
   @files = files
   file_name = params[:file_name].to_s
   if file_name.empty? || @files.include?(file_name) || File.extname(file_name).empty?
@@ -111,14 +127,17 @@ get "/:file_name" do
 end
 
 get "/:file_name/edit" do
-  # pathname = root + "/data/" + params[:file_name]
+  confirm_signed_in_user
+
   file_path = File.join(data_path, params[:file_name])
   @content = File.read(file_path)
-
+  
   erb :edit
 end
 
 post "/:file_name" do
+  confirm_signed_in_user
+
   file_path = File.join(data_path, params[:file_name])
   # pathname = root + "/data/" + params[:file_name]
   File.write(file_path, params[:content])
@@ -127,6 +146,8 @@ post "/:file_name" do
 end
 
 post "/:file_name/delete" do
+  confirm_signed_in_user
+
   file_path = File.join(data_path, params[:file_name])
   
   File.delete(file_path)
