@@ -3,6 +3,8 @@ require "sinatra/reloader" if development?
 # require "sinatra/content_for"
 require "tilt/erubis"
 require "redcarpet"
+require "yaml"
+require "bcrypt"
 
 
 configure do
@@ -39,6 +41,26 @@ helpers do
       redirect "/"
     end
   end
+
+  def users
+    credentials_path = if ENV["RACK_ENV"] == "test"
+      File.expand_path("../test/users.yml", __FILE__)
+    else
+      File.expand_path("../users.yml", __FILE__)
+    end
+    YAML.load_file(credentials_path)
+  end
+
+  def valid_credentials?(username, password)
+    credentials = users
+
+    if credentials.key?(username)
+      bcrypt_password = BCrypt::Password.new(credentials[username])
+      bcrypt_password == password
+    else
+      false
+    end
+  end
 end
 
 def data_path
@@ -73,8 +95,9 @@ get "/users/signin" do
 end
 
 post "/users/signin" do  
-  if params[:username] == "admin" && params[:password] == "secret"
-    session[:username] = params[:username]
+  username = params[:username]
+  if valid_credentials?(username, params[:password])
+    session[:username] = username
     session[:message] = "Welcome!"
     redirect "/"
   else
