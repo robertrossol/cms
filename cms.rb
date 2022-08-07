@@ -1,6 +1,5 @@
 require "sinatra"
 require "sinatra/reloader" if development?
-# require "sinatra/content_for"
 require "tilt/erubis"
 require "redcarpet"
 require "yaml"
@@ -10,7 +9,6 @@ require "bcrypt"
 configure do
   enable :sessions
   set :session_secret, 'super   secret'
-  # set :erb, :escape_html => true
 end
 
 helpers do
@@ -32,7 +30,6 @@ helpers do
 
   def signed_in?
     session.key?(:username)
-    # session[:username] == "admin"
   end
 
   def confirm_signed_in_user
@@ -81,11 +78,7 @@ get "/" do
   @files = Dir.glob(pattern).map do |path|
     File.basename(path)
   end
-  # @files = files
-  # @text_files = Dir.entries('.').select{|file| file.split('.').last == "txt"}.sort
-  # @files = Dir.glob(root + "/data/*").map do |path|
-  #   File.basename(path)
-  # end
+
   erb :index
 end
 
@@ -94,7 +87,7 @@ get "/users/signin" do
   erb :sign_in
 end
 
-post "/users/signin" do  
+post "/users/signin" do
   username = params[:username]
   if valid_credentials?(username, params[:password])
     session[:username] = username
@@ -140,7 +133,7 @@ end
 
 get "/:file_name" do
   file_path = File.join(data_path, params[:file_name])
-  # pathname = root + "/data/" + params[:file_name]
+  
   if File.exist?(file_path)
     load_file_content(file_path)
   else
@@ -162,7 +155,7 @@ post "/:file_name" do
   confirm_signed_in_user
 
   file_path = File.join(data_path, params[:file_name])
-  # pathname = root + "/data/" + params[:file_name]
+
   File.write(file_path, params[:content])
   session[:message] = "#{params[:file_name]} has been updated!"
   redirect "/"
